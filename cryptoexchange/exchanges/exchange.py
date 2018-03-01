@@ -5,6 +5,12 @@ from datetime import  datetime
 class Exchange(RestMessenger):
     __metaclass__ = ABCMeta
 
+    @classmethod
+    def get_symbols_info_from_all_exchanges(cls):
+        # TODO this implementation requires the subclasses to be imported in __init__.py there might be a better way
+        for exchange in cls.__subclasses__():
+            yield exchange().get_symbols_info()
+
     def get_symbols_info(self):
         """
         Get information about all the symbols as elasticsearch documents

@@ -1,13 +1,9 @@
 from elasticsearch import Elasticsearch, helpers
-from cryptoexchange.exchanges import (
-    binance,
-    kraken
-)
+from cryptoexchange.exchanges.exchange import Exchange
 
 
 class Indexer():
     def __init__(self):
-        self.exchanges = [binance.Binance, kraken.Kraken]
         self.__es = None
 
     @property
@@ -33,8 +29,8 @@ class Indexer():
         Gets symbol info from every exchange and uploads the information to elasticsearch
         :return: None
         """
-        for exchange in self.exchanges:
-            self.bulk_index(exchange().get_symbols_info())
+        for symbols_info in Exchange.get_symbols_info_from_all_exchanges():
+            self.bulk_index(symbols_info)
 
     @staticmethod
     def es_bulk_dictify(object_list):
