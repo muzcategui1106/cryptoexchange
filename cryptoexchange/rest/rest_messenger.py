@@ -8,7 +8,7 @@ from cryptoexchange.exceptions.exceptions import RestMessengerError
 logger = getLogger()
 
 class RestMessenger:
-    def get_json(self, uri, headers=None):
+    async def get_json(self, uri, headers=None):
         """
         Returns only the first result as a json an ignore the others
         :param uri: uri
@@ -16,26 +16,25 @@ class RestMessenger:
         :return: a single Json
         """
         message_list = [RestMessage(uri, headers)]
-        return self.jsonify_response(self.async_send(message_list)[0])
+        response = await self.async_send(message_list)
+        return self.jsonify_response(response[0])
 
-    def get_jsons(self, message_lists):
+    async def get_jsons(self, message_lists):
         """
         Returns all the results as a list of json
         :param message_lists:  a list of RestMessages
         :return: a list of jsons
         """
-        return self.jsonify_response_list(self.async_send(message_lists))
+        response = await self.async_send(message_lists)
+        return self.jsonify_response_list(response)
 
-    def async_send(self, message_list):
+    async def async_send(self, message_list):
         """
         send a list of messages over HTTP asynchronously
         :param message_list: a list of RestMessages
         :return: a list of responses
         """
-        loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(self.__async_send(message_list))
-        loop.run_until_complete(future)
-        return future.result()
+        return await (self.__async_send(message_list))
 
     async def __async_send(self, message_list):
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
